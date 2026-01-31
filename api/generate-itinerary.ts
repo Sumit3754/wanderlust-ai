@@ -4,14 +4,14 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY || process.env.VITE_CLAUDE_API_KEY;
   if (!apiKey) {
     console.warn(
-      "[api/generate-itinerary] Missing process.env.ANTHROPIC_API_KEY. Set it in Vercel Project Settings → Environment Variables, or in .env.local for local dev."
+      "[api/generate-itinerary] Missing API key. Set ANTHROPIC_API_KEY (recommended) or VITE_CLAUDE_API_KEY (fallback) in your environment. For Vercel: Project Settings → Environment Variables. For local dev: .env.local"
     );
     return res.status(500).json({
-      error: "Server misconfigured: missing ANTHROPIC_API_KEY",
-      hint: "Set ANTHROPIC_API_KEY",
+      error: "Server misconfigured: missing API key",
+      hint: "Set ANTHROPIC_API_KEY (recommended) or VITE_CLAUDE_API_KEY",
     });
   }
 

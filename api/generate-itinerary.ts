@@ -4,12 +4,15 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const apiKey = process.env.OPENAI_KEY;
+  const apiKey = process.env.OPENAI_KEY || process.env.VITE_OPENAI_API_KEY;
   if (!apiKey) {
     console.warn(
-      "[api/generate-itinerary] Missing process.env.OPENAI_KEY. Set it in your environment (Vercel Project Settings → Environment Variables) or in .env.local for local dev."
+      "[api/generate-itinerary] Missing API key. Set OPENAI_KEY (recommended, server-only) or VITE_OPENAI_API_KEY (fallback) in your environment. For Vercel: Project Settings → Environment Variables. For local dev: .env.local"
     );
-    return res.status(500).json({ error: "Server misconfigured: missing OPENAI_KEY" });
+    return res.status(500).json({
+      error: "Server misconfigured: missing API key",
+      hint: "Set OPENAI_KEY (recommended) or VITE_OPENAI_API_KEY",
+    });
   }
 
   try {

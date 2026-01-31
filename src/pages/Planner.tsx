@@ -32,6 +32,88 @@ const Planner = () => {
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
 
+  const createOfflineItinerary = () => {
+    const normalizedDestination = destination?.trim() || 'Tokyo, Japan';
+    const dates = startDate && endDate ? `${startDate} - ${endDate}` : 'March 15 - March 22, 2024';
+
+    const tokyoDays = [
+      {
+        day: 1,
+        title: 'Arrival & Shibuya Exploration',
+        activities: [
+          { time: '14:00', title: 'Arrive & check in', type: 'transport', duration: '2 hours' },
+          { time: '17:00', title: 'Neighborhood walk', type: 'sightseeing', duration: '1.5 hours' },
+          { time: '19:00', title: 'Local dinner spot', type: 'food', duration: '2.5 hours' },
+        ],
+      },
+      {
+        day: 2,
+        title: 'Food, Markets & Culture',
+        activities: [
+          { time: '09:00', title: 'Breakfast & coffee', type: 'food', duration: '1 hour' },
+          { time: '10:30', title: 'Local market visit', type: 'shopping', duration: '2 hours' },
+          { time: '13:30', title: 'Lunch + scenic walk', type: 'food', duration: '2 hours' },
+          { time: '17:00', title: 'Museum / temple / landmark', type: 'culture', duration: '2 hours' },
+        ],
+      },
+      {
+        day: 3,
+        title: 'Highlights & Photo Spots',
+        activities: [
+          { time: '09:00', title: 'Top viewpoint / skyline', type: 'sightseeing', duration: '2 hours' },
+          { time: '12:00', title: 'Signature local lunch', type: 'food', duration: '1.5 hours' },
+          { time: '14:30', title: 'Iconic neighborhood exploration', type: 'photography', duration: '3 hours' },
+          { time: '19:00', title: 'Nightlife / dessert crawl', type: 'nightlife', duration: '2.5 hours' },
+        ],
+      },
+    ];
+
+    const genericDays = [
+      {
+        day: 1,
+        title: 'Arrival & City Intro',
+        activities: [
+          { time: '14:00', title: 'Arrive & check in', type: 'transport', duration: '2 hours' },
+          { time: '17:00', title: 'Orientation walk', type: 'sightseeing', duration: '2 hours' },
+          { time: '19:30', title: 'Local dinner', type: 'food', duration: '2 hours' },
+        ],
+      },
+      {
+        day: 2,
+        title: 'Top Attractions',
+        activities: [
+          { time: '09:00', title: 'Landmark / museum', type: 'culture', duration: '2 hours' },
+          { time: '12:00', title: 'Lunch', type: 'food', duration: '1.5 hours' },
+          { time: '14:00', title: 'Scenic area / park', type: 'sightseeing', duration: '2 hours' },
+          { time: '18:30', title: 'Dinner + evening stroll', type: 'food', duration: '2.5 hours' },
+        ],
+      },
+      {
+        day: 3,
+        title: 'Shopping & Hidden Gems',
+        activities: [
+          { time: '10:00', title: 'Local market / shopping street', type: 'shopping', duration: '2.5 hours' },
+          { time: '13:00', title: 'Street food / cafe', type: 'food', duration: '1.5 hours' },
+          { time: '15:00', title: 'Neighborhood exploration', type: 'photography', duration: '3 hours' },
+        ],
+      },
+    ];
+
+    const isTokyo = normalizedDestination.toLowerCase().includes('tokyo');
+    const days = isTokyo ? tokyoDays : genericDays;
+
+    return {
+      destination: normalizedDestination,
+      dates,
+      days,
+      budgetTips: [
+        'Book high-demand attractions in advance to save time.',
+        'Use public transit day passes where available.',
+        'Mix premium meals with casual local spots to stay on budget.',
+      ],
+    };
+  };
+
   const toggleInterest = (id: string) => {
     setSelectedInterests((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
@@ -43,57 +125,13 @@ const Planner = () => {
     setIsGenerating(true);
 
     try {
-      const res = await fetch('/api/generate-itinerary', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          destination,
-          startDate,
-          endDate,
-          budget: budget[0],
-          interests: selectedInterests,
-        }),
-      });
-
-      if (!res.ok) {
-        const raw = await res.text().catch(() => '');
-        let msg = raw;
-        try {
-          const parsed = raw ? JSON.parse(raw) : null;
-          msg = parsed?.message || parsed?.error || raw;
-          if (res.status === 429) {
-            msg = msg || 'You are being rate-limited or your quota is exhausted. Please try again in a moment.';
-          }
-        } catch {
-          if (res.status === 429 && !msg) {
-            msg = 'You are being rate-limited or your quota is exhausted. Please try again in a moment.';
-          }
-        }
-
-        toast({
-          title: 'AI generation failed',
-          description: msg || 'Failed to generate itinerary. Please try again.',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      const data = await res.json();
-      if (!data?.itinerary) {
-        toast({
-          title: 'AI generation failed',
-          description: 'The server returned an empty itinerary. Please try again.',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      sessionStorage.setItem('wanderly_itinerary', JSON.stringify(data.itinerary));
-      toast({ title: 'Itinerary ready', description: 'Your personalized trip plan is ready.' });
+      const itinerary = createOfflineItinerary();
+      sessionStorage.setItem('wanderly_itinerary', JSON.stringify(itinerary));
+      toast({ title: 'Itinerary ready', description: 'Your trip plan is ready (offline mode).' });
       navigate('/itinerary/demo');
     } catch (err) {
       toast({
-        title: 'AI generation failed',
+        title: 'Generation failed',
         description: 'Failed to generate itinerary. Please try again.',
         variant: 'destructive',
       });

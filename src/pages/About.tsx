@@ -13,6 +13,18 @@ const About = () => {
 
           <div className="space-y-6">
             <GlassCard>
+              <h2 className="font-display font-semibold text-lg mb-2">Vision</h2>
+              <p className="text-sm text-muted-foreground">
+                A world where anyone can plan a trip confidently in minutes and share it instantly.
+              </p>
+            </GlassCard>
+            <GlassCard>
+              <h2 className="font-display font-semibold text-lg mb-2">Mission</h2>
+              <p className="text-sm text-muted-foreground">
+                Turn travel intent into a practical, personalized day-by-day itinerary with minimal effort.
+              </p>
+            </GlassCard>
+            <GlassCard>
               <h2 className="font-display font-semibold text-lg mb-2">Why Wanderly</h2>
               <p className="text-sm text-muted-foreground">
                 Planning should feel exciting, not overwhelming. We focus on clarity and practical day-by-day structure.

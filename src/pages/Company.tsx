@@ -19,6 +19,12 @@ const Company = () => {
               </p>
             </GlassCard>
             <GlassCard>
+              <h2 className="font-display font-semibold text-lg mb-2">Vision</h2>
+              <p className="text-sm text-muted-foreground">
+                Become the default place where trips are planned, shared, and booked end-to-end.
+              </p>
+            </GlassCard>
+            <GlassCard>
               <h2 className="font-display font-semibold text-lg mb-2">What we build</h2>
               <p className="text-sm text-muted-foreground">
                 A planner, itinerary viewer, and travel dashboard designed for fast decision-making.

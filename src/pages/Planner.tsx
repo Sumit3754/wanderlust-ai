@@ -36,6 +36,34 @@ const Planner = () => {
     const normalizedDestination = destination?.trim() || 'Tokyo, Japan';
     const dates = startDate && endDate ? `${startDate} - ${endDate}` : 'March 15 - March 22, 2024';
 
+    const formatDayLabel = (isoDate: string) => {
+      const d = new Date(isoDate);
+      if (Number.isNaN(d.getTime())) return '';
+      return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(d);
+    };
+
+    const dayLabels = (() => {
+      const d0 = new Date(startDate);
+      if (Number.isNaN(d0.getTime())) return ['', '', ''];
+      const d1 = new Date(d0);
+      d1.setDate(d1.getDate() + 1);
+      const d2 = new Date(d0);
+      d2.setDate(d2.getDate() + 2);
+      const iso0 = d0.toISOString().slice(0, 10);
+      const iso1 = d1.toISOString().slice(0, 10);
+      const iso2 = d2.toISOString().slice(0, 10);
+      return [formatDayLabel(iso0), formatDayLabel(iso1), formatDayLabel(iso2)];
+    })();
+
+    const totalBudget = budget?.[0] ?? 2000;
+    const budgetBreakdown = {
+      accommodation: Math.round(totalBudget * 0.35),
+      food: Math.round(totalBudget * 0.25),
+      activities: Math.round(totalBudget * 0.2),
+      transport: Math.round(totalBudget * 0.15),
+      misc: Math.max(0, totalBudget - (Math.round(totalBudget * 0.35) + Math.round(totalBudget * 0.25) + Math.round(totalBudget * 0.2) + Math.round(totalBudget * 0.15))),
+    };
+
     const images = {
       tokyo: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1200&h=600&fit=crop',
       paris: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200&h=600&fit=crop',
@@ -47,6 +75,7 @@ const Planner = () => {
     const parisDays = [
       {
         day: 1,
+        date: dayLabels[0],
         title: 'Arrive & Classic Paris Walk',
         activities: [
           { time: '14:00', title: 'Check in & freshen up', type: 'accommodation', duration: '1.5 hours' },
@@ -56,6 +85,7 @@ const Planner = () => {
       },
       {
         day: 2,
+        date: dayLabels[1],
         title: 'Museums & Landmarks',
         activities: [
           { time: '09:00', title: 'Louvre (or Musée d’Orsay)', type: 'culture', duration: '3 hours' },
@@ -66,6 +96,7 @@ const Planner = () => {
       },
       {
         day: 3,
+        date: dayLabels[2],
         title: 'Neighborhoods & Shopping',
         activities: [
           { time: '10:00', title: 'Le Marais exploration', type: 'sightseeing', duration: '2.5 hours' },
@@ -78,6 +109,7 @@ const Planner = () => {
     const goaDays = [
       {
         day: 1,
+        date: dayLabels[0],
         title: 'Beach Time & Sunset',
         activities: [
           { time: '14:00', title: 'Check in & beach walk', type: 'sightseeing', duration: '2 hours' },
@@ -87,6 +119,7 @@ const Planner = () => {
       },
       {
         day: 2,
+        date: dayLabels[1],
         title: 'Old Goa & Culture',
         activities: [
           { time: '09:00', title: 'Churches / heritage sites', type: 'culture', duration: '2.5 hours' },
@@ -97,6 +130,7 @@ const Planner = () => {
       },
       {
         day: 3,
+        date: dayLabels[2],
         title: 'Adventure & Relax',
         activities: [
           { time: '09:30', title: 'Water sports / boat ride', type: 'adventure', duration: '2.5 hours' },
@@ -109,6 +143,7 @@ const Planner = () => {
     const manaliDays = [
       {
         day: 1,
+        date: dayLabels[0],
         title: 'Arrive & Riverside Evening',
         activities: [
           { time: '14:00', title: 'Check in & rest', type: 'accommodation', duration: '1.5 hours' },
@@ -118,6 +153,7 @@ const Planner = () => {
       },
       {
         day: 2,
+        date: dayLabels[1],
         title: 'Mountains & Adventure',
         activities: [
           { time: '09:00', title: 'Scenic viewpoint / valley tour', type: 'sightseeing', duration: '3 hours' },
@@ -127,6 +163,7 @@ const Planner = () => {
       },
       {
         day: 3,
+        date: dayLabels[2],
         title: 'Temples & Shopping',
         activities: [
           { time: '10:00', title: 'Temple visit', type: 'culture', duration: '1.5 hours' },
@@ -139,6 +176,7 @@ const Planner = () => {
     const tokyoDays = [
       {
         day: 1,
+        date: dayLabels[0],
         title: 'Arrival & Shibuya Exploration',
         activities: [
           { time: '14:00', title: 'Arrive & check in', type: 'transport', duration: '2 hours' },
@@ -148,6 +186,7 @@ const Planner = () => {
       },
       {
         day: 2,
+        date: dayLabels[1],
         title: 'Food, Markets & Culture',
         activities: [
           { time: '09:00', title: 'Breakfast & coffee', type: 'food', duration: '1 hour' },
@@ -158,6 +197,7 @@ const Planner = () => {
       },
       {
         day: 3,
+        date: dayLabels[2],
         title: 'Highlights & Photo Spots',
         activities: [
           { time: '09:00', title: 'Top viewpoint / skyline', type: 'sightseeing', duration: '2 hours' },
@@ -171,6 +211,7 @@ const Planner = () => {
     const genericDays = [
       {
         day: 1,
+        date: dayLabels[0],
         title: 'Arrival & City Intro',
         activities: [
           { time: '14:00', title: 'Arrive & check in', type: 'transport', duration: '2 hours' },
@@ -180,6 +221,7 @@ const Planner = () => {
       },
       {
         day: 2,
+        date: dayLabels[1],
         title: 'Top Attractions',
         activities: [
           { time: '09:00', title: 'Landmark / museum', type: 'culture', duration: '2 hours' },
@@ -190,6 +232,7 @@ const Planner = () => {
       },
       {
         day: 3,
+        date: dayLabels[2],
         title: 'Shopping & Hidden Gems',
         activities: [
           { time: '10:00', title: 'Local market / shopping street', type: 'shopping', duration: '2.5 hours' },
@@ -229,6 +272,8 @@ const Planner = () => {
       destination: normalizedDestination,
       dates,
       image,
+      totalBudget,
+      budgetBreakdown,
       days,
       budgetTips: [
         'Book high-demand attractions in advance to save time.',
@@ -251,7 +296,7 @@ const Planner = () => {
     try {
       const itinerary = createOfflineItinerary();
       sessionStorage.setItem('wanderly_itinerary', JSON.stringify(itinerary));
-      toast({ title: 'Itinerary ready', description: 'Your trip plan is ready (offline mode).' });
+      toast({ title: 'Itinerary ready', description: 'Your trip plan is ready.' });
       navigate('/itinerary/demo');
     } catch (err) {
       toast({

@@ -143,6 +143,12 @@ const Itinerary = () => {
         destination: stored?.destination || demoItinerary.destination,
         dates: stored?.dates || demoItinerary.dates,
         image: stored?.image || demoItinerary.image,
+        totalBudget:
+          typeof stored?.totalBudget === 'number' ? stored.totalBudget : demoItinerary.totalBudget,
+        budgetBreakdown:
+          stored?.budgetBreakdown && typeof stored.budgetBreakdown === 'object'
+            ? stored.budgetBreakdown
+            : demoItinerary.budgetBreakdown,
         totalDays: Array.isArray(stored?.days) ? stored.days.length : demoItinerary.totalDays,
         days: Array.isArray(stored?.days)
           ? stored.days.map((d: any, idx: number) => ({
@@ -155,8 +161,11 @@ const Itinerary = () => {
       }
     : demoItinerary;
 
-  const totalSpent = Object.values(itinerary.budgetBreakdown).reduce((a, b) => a + b, 0);
-  const budgetPercentage = (totalSpent / itinerary.totalBudget) * 100;
+  const totalSpent = Object.values(itinerary.budgetBreakdown as Record<string, unknown>).reduce<number>(
+    (a, b) => a + (typeof b === 'number' ? b : 0),
+    0
+  );
+  const budgetPercentage = (totalSpent / Number(itinerary.totalBudget)) * 100;
 
   return (
     <Layout isAuthenticated showFooter={false}>

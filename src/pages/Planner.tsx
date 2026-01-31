@@ -36,6 +36,14 @@ const Planner = () => {
     const normalizedDestination = destination?.trim() || 'Tokyo, Japan';
     const dates = startDate && endDate ? `${startDate} - ${endDate}` : 'March 15 - March 22, 2024';
 
+    const images = {
+      tokyo: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1200&h=600&fit=crop',
+      paris: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200&h=600&fit=crop',
+      goa: 'https://images.unsplash.com/photo-1580748141549-71748dbe0d86?w=1200&h=600&fit=crop',
+      manali: '/manali.jpg',
+      generic: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&h=600&fit=crop',
+    };
+
     const parisDays = [
       {
         day: 1,
@@ -207,9 +215,20 @@ const Planner = () => {
             ? manaliDays
             : genericDays;
 
+    const image = isTokyo
+      ? images.tokyo
+      : isParis
+        ? images.paris
+        : isGoa
+          ? images.goa
+          : isManali
+            ? images.manali
+            : images.generic;
+
     return {
       destination: normalizedDestination,
       dates,
+      image,
       days,
       budgetTips: [
         'Book high-demand attractions in advance to save time.',

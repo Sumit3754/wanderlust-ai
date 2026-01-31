@@ -142,6 +142,7 @@ const Itinerary = () => {
         ...demoItinerary,
         destination: stored?.destination || demoItinerary.destination,
         dates: stored?.dates || demoItinerary.dates,
+        image: stored?.image || demoItinerary.image,
         totalDays: Array.isArray(stored?.days) ? stored.days.length : demoItinerary.totalDays,
         days: Array.isArray(stored?.days)
           ? stored.days.map((d: any, idx: number) => ({

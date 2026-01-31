@@ -129,7 +129,30 @@ const Itinerary = () => {
     );
   };
 
-  const itinerary = demoItinerary;
+  let stored: any = null;
+  try {
+    const raw = sessionStorage.getItem('wanderly_itinerary');
+    stored = raw ? JSON.parse(raw) : null;
+  } catch {
+    stored = null;
+  }
+
+  const itinerary = stored
+    ? {
+        ...demoItinerary,
+        destination: stored?.destination || demoItinerary.destination,
+        dates: stored?.dates || demoItinerary.dates,
+        totalDays: Array.isArray(stored?.days) ? stored.days.length : demoItinerary.totalDays,
+        days: Array.isArray(stored?.days)
+          ? stored.days.map((d: any, idx: number) => ({
+              day: typeof d?.day === 'number' ? d.day : idx + 1,
+              date: d?.date || demoItinerary.days?.[idx]?.date || '',
+              title: d?.title || demoItinerary.days?.[idx]?.title || `Day ${idx + 1}`,
+              activities: Array.isArray(d?.activities) ? d.activities : [],
+            }))
+          : demoItinerary.days,
+      }
+    : demoItinerary;
 
   const totalSpent = Object.values(itinerary.budgetBreakdown).reduce((a, b) => a + b, 0);
   const budgetPercentage = (totalSpent / itinerary.totalBudget) * 100;

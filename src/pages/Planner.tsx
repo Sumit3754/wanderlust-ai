@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import GlassCard from '@/components/ui/GlassCard';
+import { toast } from '@/components/ui/use-toast';
 
 const interests = [
   { id: 'adventure', icon: Mountain, label: 'Adventure' },
@@ -40,12 +41,52 @@ const Planner = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsGenerating(true);
-    
-    // Simulate AI generation
-    setTimeout(() => {
-      setIsGenerating(false);
+
+    try {
+      const res = await fetch('/api/generate-itinerary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          destination,
+          startDate,
+          endDate,
+          budget: budget[0],
+          interests: selectedInterests,
+        }),
+      });
+
+      if (!res.ok) {
+        const msg = await res.text().catch(() => '');
+        toast({
+          title: 'AI generation failed',
+          description: msg || 'Failed to generate itinerary. Please try again.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const data = await res.json();
+      if (!data?.itinerary) {
+        toast({
+          title: 'AI generation failed',
+          description: 'The server returned an empty itinerary. Please try again.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      sessionStorage.setItem('wanderly_itinerary', JSON.stringify(data.itinerary));
+      toast({ title: 'Itinerary ready', description: 'Your personalized trip plan is ready.' });
       navigate('/itinerary/demo');
-    }, 2500);
+    } catch (err) {
+      toast({
+        title: 'AI generation failed',
+        description: 'Failed to generate itinerary. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (

@@ -26,8 +26,8 @@ const interests = [
 const Planner = () => {
   const navigate = useNavigate();
   const [destination, setDestination] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState('2026-03-20');
+  const [endDate, setEndDate] = useState('2026-03-23');
   const [budget, setBudget] = useState([2000]);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);

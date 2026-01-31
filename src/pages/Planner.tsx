@@ -56,7 +56,20 @@ const Planner = () => {
       });
 
       if (!res.ok) {
-        const msg = await res.text().catch(() => '');
+        const raw = await res.text().catch(() => '');
+        let msg = raw;
+        try {
+          const parsed = raw ? JSON.parse(raw) : null;
+          msg = parsed?.message || parsed?.error || raw;
+          if (res.status === 429) {
+            msg = msg || 'You are being rate-limited or your quota is exhausted. Please try again in a moment.';
+          }
+        } catch {
+          if (res.status === 429 && !msg) {
+            msg = 'You are being rate-limited or your quota is exhausted. Please try again in a moment.';
+          }
+        }
+
         toast({
           title: 'AI generation failed',
           description: msg || 'Failed to generate itinerary. Please try again.',

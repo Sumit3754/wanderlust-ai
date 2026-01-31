@@ -62,11 +62,35 @@ export default async function handler(req: any, res: any) {
     });
 
     if (!openAiRes.ok) {
-      const text = await openAiRes.text();
-      console.error("[api/generate-itinerary] OpenAI error:", openAiRes.status, text);
-      return res.status(502).json({
+      const retryAfter = openAiRes.headers.get("retry-after");
+      if (retryAfter) res.setHeader("Retry-After", retryAfter);
+
+      const raw = await openAiRes.text();
+      let providerMessage: string | undefined;
+      let providerType: string | undefined;
+      let providerCode: string | undefined;
+
+      try {
+        const parsed = JSON.parse(raw);
+        providerMessage = parsed?.error?.message;
+        providerType = parsed?.error?.type;
+        providerCode = parsed?.error?.code;
+      } catch {
+        // ignore JSON parse errors
+      }
+
+      console.error(
+        "[api/generate-itinerary] OpenAI error:",
+        openAiRes.status,
+        providerMessage || raw
+      );
+
+      return res.status(openAiRes.status).json({
         error: "AI provider request failed",
         status: openAiRes.status,
+        message: providerMessage,
+        type: providerType,
+        code: providerCode,
       });
     }
 

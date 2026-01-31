@@ -36,6 +36,98 @@ const Planner = () => {
     const normalizedDestination = destination?.trim() || 'Tokyo, Japan';
     const dates = startDate && endDate ? `${startDate} - ${endDate}` : 'March 15 - March 22, 2024';
 
+    const parisDays = [
+      {
+        day: 1,
+        title: 'Arrive & Classic Paris Walk',
+        activities: [
+          { time: '14:00', title: 'Check in & freshen up', type: 'accommodation', duration: '1.5 hours' },
+          { time: '16:00', title: 'Seine riverside stroll', type: 'sightseeing', duration: '2 hours' },
+          { time: '19:00', title: 'Bistro dinner', type: 'food', duration: '2.5 hours' },
+        ],
+      },
+      {
+        day: 2,
+        title: 'Museums & Landmarks',
+        activities: [
+          { time: '09:00', title: 'Louvre (or Musée d’Orsay)', type: 'culture', duration: '3 hours' },
+          { time: '13:00', title: 'Cafe lunch', type: 'food', duration: '1.5 hours' },
+          { time: '15:00', title: 'Eiffel Tower area + photos', type: 'photography', duration: '2.5 hours' },
+          { time: '19:30', title: 'Montmartre evening', type: 'nightlife', duration: '2.5 hours' },
+        ],
+      },
+      {
+        day: 3,
+        title: 'Neighborhoods & Shopping',
+        activities: [
+          { time: '10:00', title: 'Le Marais exploration', type: 'sightseeing', duration: '2.5 hours' },
+          { time: '13:00', title: 'Pastry + lunch', type: 'food', duration: '1.5 hours' },
+          { time: '15:00', title: 'Shopping streets / galleries', type: 'shopping', duration: '3 hours' },
+        ],
+      },
+    ];
+
+    const goaDays = [
+      {
+        day: 1,
+        title: 'Beach Time & Sunset',
+        activities: [
+          { time: '14:00', title: 'Check in & beach walk', type: 'sightseeing', duration: '2 hours' },
+          { time: '17:00', title: 'Sunset viewpoint', type: 'photography', duration: '1.5 hours' },
+          { time: '19:30', title: 'Seafood dinner', type: 'food', duration: '2.5 hours' },
+        ],
+      },
+      {
+        day: 2,
+        title: 'Old Goa & Culture',
+        activities: [
+          { time: '09:00', title: 'Churches / heritage sites', type: 'culture', duration: '2.5 hours' },
+          { time: '12:30', title: 'Local Goan lunch', type: 'food', duration: '1.5 hours' },
+          { time: '15:00', title: 'Fort / panoramic views', type: 'sightseeing', duration: '2 hours' },
+          { time: '19:00', title: 'Night market / live music', type: 'nightlife', duration: '2.5 hours' },
+        ],
+      },
+      {
+        day: 3,
+        title: 'Adventure & Relax',
+        activities: [
+          { time: '09:30', title: 'Water sports / boat ride', type: 'adventure', duration: '2.5 hours' },
+          { time: '13:00', title: 'Beach shacks lunch', type: 'food', duration: '1.5 hours' },
+          { time: '16:00', title: 'Cafe hopping', type: 'food', duration: '2 hours' },
+        ],
+      },
+    ];
+
+    const manaliDays = [
+      {
+        day: 1,
+        title: 'Arrive & Riverside Evening',
+        activities: [
+          { time: '14:00', title: 'Check in & rest', type: 'accommodation', duration: '1.5 hours' },
+          { time: '16:30', title: 'Old Manali walk', type: 'sightseeing', duration: '2 hours' },
+          { time: '19:30', title: 'Cozy cafe dinner', type: 'food', duration: '2 hours' },
+        ],
+      },
+      {
+        day: 2,
+        title: 'Mountains & Adventure',
+        activities: [
+          { time: '09:00', title: 'Scenic viewpoint / valley tour', type: 'sightseeing', duration: '3 hours' },
+          { time: '13:00', title: 'Local lunch', type: 'food', duration: '1.5 hours' },
+          { time: '15:00', title: 'Adventure activity (zipline/trek)', type: 'adventure', duration: '3 hours' },
+        ],
+      },
+      {
+        day: 3,
+        title: 'Temples & Shopping',
+        activities: [
+          { time: '10:00', title: 'Temple visit', type: 'culture', duration: '1.5 hours' },
+          { time: '12:30', title: 'Lunch + hot chai', type: 'food', duration: '1.5 hours' },
+          { time: '15:00', title: 'Local market shopping', type: 'shopping', duration: '2.5 hours' },
+        ],
+      },
+    ];
+
     const tokyoDays = [
       {
         day: 1,
@@ -99,8 +191,21 @@ const Planner = () => {
       },
     ];
 
-    const isTokyo = normalizedDestination.toLowerCase().includes('tokyo');
-    const days = isTokyo ? tokyoDays : genericDays;
+    const q = normalizedDestination.toLowerCase();
+    const isTokyo = q.includes('tokyo');
+    const isParis = q.includes('paris');
+    const isGoa = q.includes('goa');
+    const isManali = q.includes('manali');
+
+    const days = isTokyo
+      ? tokyoDays
+      : isParis
+        ? parisDays
+        : isGoa
+          ? goaDays
+          : isManali
+            ? manaliDays
+            : genericDays;
 
     return {
       destination: normalizedDestination,

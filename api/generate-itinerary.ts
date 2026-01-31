@@ -4,16 +4,28 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const apiKey = process.env.OPENAI_KEY || process.env.VITE_OPENAI_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     console.warn(
-      "[api/generate-itinerary] Missing API key. Set OPENAI_KEY (recommended, server-only) or VITE_OPENAI_API_KEY (fallback) in your environment. For Vercel: Project Settings → Environment Variables. For local dev: .env.local"
+      "[api/generate-itinerary] Missing process.env.ANTHROPIC_API_KEY. Set it in Vercel Project Settings → Environment Variables, or in .env.local for local dev."
     );
     return res.status(500).json({
-      error: "Server misconfigured: missing API key",
-      hint: "Set OPENAI_KEY (recommended) or VITE_OPENAI_API_KEY",
+      error: "Server misconfigured: missing ANTHROPIC_API_KEY",
+      hint: "Set ANTHROPIC_API_KEY",
     });
   }
+
+  const extractJson = (text: string) => {
+    const trimmed = (text || "").trim();
+
+    const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    if (fenced?.[1]) return fenced[1].trim();
+
+    const firstObj = trimmed.match(/\{[\s\S]*\}/);
+    if (firstObj?.[0]) return firstObj[0].trim();
+
+    return trimmed;
+  };
 
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
@@ -45,27 +57,27 @@ export default async function handler(req: any, res: any) {
       interests,
     };
 
-    const openAiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+    const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "claude-3-5-sonnet-20241022",
+        max_tokens: 1200,
         temperature: 0.4,
-        messages: [
-          { role: "system", content: prompt },
-          { role: "user", content: JSON.stringify(userInput) },
-        ],
+        system: prompt,
+        messages: [{ role: "user", content: JSON.stringify(userInput) }],
       }),
     });
 
-    if (!openAiRes.ok) {
-      const retryAfter = openAiRes.headers.get("retry-after");
+    if (!anthropicRes.ok) {
+      const retryAfter = anthropicRes.headers.get("retry-after");
       if (retryAfter) res.setHeader("Retry-After", retryAfter);
 
-      const raw = await openAiRes.text();
+      const raw = await anthropicRes.text();
       let providerMessage: string | undefined;
       let providerType: string | undefined;
       let providerCode: string | undefined;
@@ -80,33 +92,40 @@ export default async function handler(req: any, res: any) {
       }
 
       console.error(
-        "[api/generate-itinerary] OpenAI error:",
-        openAiRes.status,
+        "[api/generate-itinerary] Anthropic error:",
+        anthropicRes.status,
         providerMessage || raw
       );
 
-      return res.status(openAiRes.status).json({
+      return res.status(anthropicRes.status).json({
         error: "AI provider request failed",
-        status: openAiRes.status,
+        status: anthropicRes.status,
         message: providerMessage,
         type: providerType,
         code: providerCode,
       });
     }
 
-    const data = await openAiRes.json();
-    const content = data?.choices?.[0]?.message?.content;
+    const data = await anthropicRes.json();
+    const contentText = Array.isArray(data?.content)
+      ? data.content
+          .filter((c: any) => c?.type === "text")
+          .map((c: any) => c?.text)
+          .filter(Boolean)
+          .join("\n")
+      : undefined;
 
-    if (!content) {
-      console.error("[api/generate-itinerary] No content in OpenAI response", data);
+    if (!contentText) {
+      console.error("[api/generate-itinerary] No content in Anthropic response", data);
       return res.status(502).json({ error: "AI provider returned an empty response" });
     }
 
     let itinerary;
     try {
-      itinerary = JSON.parse(content);
+      const jsonText = extractJson(contentText);
+      itinerary = JSON.parse(jsonText);
     } catch (e) {
-      console.error("[api/generate-itinerary] Failed to parse JSON from model", content);
+      console.error("[api/generate-itinerary] Failed to parse JSON from model", contentText);
       return res.status(502).json({
         error: "AI provider returned invalid JSON",
       });

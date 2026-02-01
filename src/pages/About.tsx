@@ -1,21 +1,45 @@
+import { useRef, useState } from 'react';
+
 import Layout from '@/components/layout/Layout';
 import GlassCard from '@/components/ui/GlassCard';
 
 const About = () => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [muted, setMuted] = useState(true);
+
   return (
     <Layout>
       <div className="relative overflow-hidden">
         <video
-          className="absolute inset-0 h-full w-full object-cover"
-          src="/background_about.MP4"
-          controls
+          className="absolute inset-0 z-0 h-full w-full object-cover"
+          src="/background_about.mp4"
+          autoPlay
+          muted={muted}
           loop
           playsInline
+          preload="auto"
+          ref={videoRef}
         />
-        <div className="absolute inset-0 bg-black/55" />
+        <div className="pointer-events-none absolute inset-0 z-10 bg-black/55" />
 
-        <div className="relative z-10 container mx-auto px-4 py-10">
+        <div className="relative z-20 container mx-auto px-4 py-10">
           <div className="max-w-4xl mx-auto">
+            <div className="mb-4 flex justify-end">
+              <button
+                type="button"
+                className="rounded-md bg-white/10 px-3 py-1.5 text-sm text-white backdrop-blur hover:bg-white/15"
+                onClick={() => {
+                  const nextMuted = !muted;
+                  setMuted(nextMuted);
+                  if (videoRef.current) {
+                    videoRef.current.muted = nextMuted;
+                    void videoRef.current.play();
+                  }
+                }}
+              >
+                {muted ? 'Unmute' : 'Mute'}
+              </button>
+            </div>
             <h1 className="text-3xl md:text-4xl font-display font-bold mb-3">About</h1>
             <p className="text-muted-foreground mb-8">
               Wanderly helps you plan trips faster with structured itineraries and a clean, modern experience.
